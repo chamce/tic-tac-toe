@@ -1,17 +1,18 @@
+// helper function to create individual elements
 function createElement(tag, classes, text, parent, id) {
-    // create element
+    // html element
     let element = document.createElement(tag);
     // if classes exist
     if (classes) {
-        // for classes
+        // iterate on classes
         for (let i = 0; i < classes.length; i++) {
-            // add class
+            // add class to element's class list
             element.classList.add(classes[i]);
         }
     }
-    // if inner text exists
+    // if text exists
     if (text) {
-        // set text
+        // add text to element's inner text
         element.innerText = text;
     }
     // if parent exists
@@ -21,71 +22,75 @@ function createElement(tag, classes, text, parent, id) {
     }
     // if id exists
     if (id) {
-        // set id
+        // set element's id
         element.id = id;
     }
     return element;
 }
 
-let turn, turnLabel, moves = 0, cols = [], container;
+// global variables used in many functions
+let turn, turnLabel, moves = 0, cols = [], container, reset;
 
 function createView() {
-    // reference app div
+    // app div in html document
     let app = document.getElementById('app');
-    // create container div
+    // container div to hold interface
     container = createElement('div', ['container', 'text-center'], false, app, false);
-    // create heading row
+    // row div to hold heading
     let headingRow = createElement('div', ['row'], false, container, false);
-    // create heading
+    // heading element
     let heading = createElement('h1', false, 'Tic-Tac-Toe', headingRow, false);
-    // create turn row
+    // row div to hold turn label
     let turnRow = createElement('div', ['row'], false, container, false);
     // randomize turn
     turn = Math.random() < 0.5 ? 'X' : 'O';
-    // create turn label
+    // turn label element
     turnLabel = createElement('h1', false, 'Turn: ' + turn + '', turnRow, false);
-    // create board row
+    // row div to hold board cols
     let boardRow = createElement('div', ['row'], false, container, false);
-    // initialize board col and state
+    // initialize col and state
     let col, state;
-    // 9 elements
+    // 9 cols
     for (let i = 0; i < 9; i++) {
-        // create board col
+        // create col element
         col = createElement('div', ['col-4', 'border', 'border-dark'], false, boardRow, 'col' + i);
-        // create board state
+        // create h1 element stored in col
         state = createElement('h1', ['text-white'], 'Z', col, 'state' + i);
-        // create click listener for col
+        // add click listener to col
         col.addEventListener('click', updateView);
-        // push board state to cols
+        // set up cols data with 0s
         cols.push(0);
     }
 }
 
 function updateView() {
-    // iterate moves
-    moves++;
-    // clicked element's index
+    // index of clicked col
     let index = this.id[this.id.length - 1];
-    // reference clicked element's state
+    // find h1 element inside col with col index
     let state = document.getElementById('state' + index);
-    // if clicked element has white text because it has never been clicked on
+    // if col hasn't been clicked yet, state will have hidden white text
     if (state.className.includes('text-white')) {
-        // remove text-white class so player symbol will show up
+        // iterate moves only when we click a 'blank' col
+        moves++;
+        // remove white text from col so it cannot be updated
         state.classList.remove('text-white');
-        // set clicked element's state to player symbol
+        // set state element to player's symbol
         state.innerText = turn;
-        // if player was X
+        // if player X turn
         if (turn === 'X') {
-            // update state in array to 1
+            // set state data to 1
             cols[index] = 1;
+            // player O turn
         } else {
-            // otherwise update state in array to -1
+            // set state data to -1
             cols[index] = -1;
         }
+        // switch turn
+        switchTurn();
     }
-    // if enough moves have been played for a win
+    // if enough moves for win
     if (moves > 4) {
-        // check win
+        // check win with clicked col's index
         checkWin(index);
     }
     // if winner not found
@@ -94,24 +99,72 @@ function updateView() {
         if (moves === 9) {
             // declare tie
             turnLabel.innerText = 'Tie!'
-        } else {
-            // alternate turn
+            // switch turn
             switchTurn();
+            // end game
+            end();
+            // haven't run out of moves
+        } else {
+            // update turn label for turn switch
+            turnLabel.innerText = 'Turn: ' + turn;
         }
+        // if winner found
+    } else {
+        // end game
+        end();
     }
 }
 
+function end() {
+    // create reset button
+    reset = createElement('button', ['my-3'], 'Reset', container, false);
+    // add click listener to reset button
+    reset.addEventListener('click', reload);
+    // for all cols
+    for (let i = 0; i < 9; i++) {
+        // remove click listener
+        document.getElementById('col' + i).removeEventListener('click', updateView);
+    }
+}
+
+function reload() {
+    // reset moves
+    moves = 0;
+    // initialize col
+    let col;
+    // for all cols
+    for (let i = 0; i < 9; i++) {
+        // get col from loop index
+        col = document.getElementById('col' + i);
+        // set state from loop index
+        state = document.getElementById('state' + i);
+        // re-add click listener to col
+        col.addEventListener('click', updateView);
+        // re-blank state of cols
+        state.classList.add('text-white');
+        // re-add filler text to state
+        state.innerText = 'Z';
+        // re-zero cols state data
+        cols[i] = 0;
+        // remove reset button
+        reset.remove();
+    }
+    // switch turn
+    switchTurn();
+    // update turn label to reflect turn switch
+    turnLabel.innerText = 'Turn: ' + turn;
+}
+
 function switchTurn() {
-    // if player X
+    // if turn X
     if (turn === 'X') {
-        // switch to player O
+        // switch to O
         turn = 'O';
+        // if turn O
     } else {
-        // else switch to player X
+        // switch to X
         turn = 'X';
     }
-    // update turn label
-    turnLabel.innerText = 'Turn: ' + turn;
 }
 
 function checkWin(index) {
@@ -119,9 +172,9 @@ function checkWin(index) {
     let i1, i2, i3, n1, n2, n3, state1, state2, state3;
     // win conditions
     let wins = ['012', '345', '678', '036', '147', '258', '048', '246'];
-    // for win conditions
+    // for all win conditions
     for (let i = 0; i < wins.length; i++) {
-        // if win condition includes clicked index
+        // if win condition includes index of selected col
         if (wins[i].includes(index)) {
             // math
             i1 = wins[i][0];
@@ -133,9 +186,11 @@ function checkWin(index) {
             state1 = cols[n1];
             state2 = cols[n2];
             state3 = cols[n3];
-            // does the absolute value of the win condition equal 3
+            // if the absolute value of the 3 states in the win condition equals 3
             if (Math.abs(state1 + state2 + state3) === 3) {
-                // winner found
+                // switch turn
+                switchTurn();
+                // declare winner
                 turnLabel.innerText = 'Winner: ' + turn + '!';
                 // leave for loop
                 break;
@@ -144,4 +199,5 @@ function checkWin(index) {
     }
 }
 
+// start program
 createView();
