@@ -5,26 +5,45 @@ class Game {
         this.states = [];
         this.moves = 0;
         this.reset = null;
+        this.count = 0;
         this.columnClicked = this.columnClicked.bind(this);
-        this.restart = this.restart.bind(this);
+        this.start = this.start.bind(this);
     }
 
     start() {
-        let app = document.getElementById('app');
-        let container = this.elementCreate('div', ['container', 'text-center'], false, app, false);
-        let headingRow = this.elementCreate('div', ['row'], false, container, false);
-        let heading = this.elementCreate('h1', false, 'Tic-Tac-Toe', headingRow, false);
-        this.turn = Math.random() < 0.5 ? 'X' : 'O';
-        let labelRow = this.elementCreate('div', ['row'], false, container, false);
-        this.label = this.elementCreate('h1', false, 'Turn: ' + this.turn + '', labelRow, false);
-        let board = this.elementCreate('div', ['row'], false, container, false);
-        let column;
-        for (let i = 0; i < 9; i++) {
-            column = this.elementCreate('div', ['col-4', 'border', 'border-dark', 'fs-1', 'text-white'], 'Z', board, 'col' + i);
-            column.addEventListener('click', this.columnClicked);
-            this.states.push(0);
+        if (this.count === 0) {
+            let app = document.getElementById('app');
+            let container = this.elementCreate('div', ['container', 'text-center'], false, app, false);
+            let headingRow = this.elementCreate('div', ['row'], false, container, false);
+            let heading = this.elementCreate('h1', false, 'Tic-Tac-Toe', headingRow, false);
+            this.turn = Math.random() < 0.5 ? 'X' : 'O';
+            let labelRow = this.elementCreate('div', ['row'], false, container, false);
+            this.label = this.elementCreate('h1', false, 'Turn: ' + this.turn + '', labelRow, false);
+            let board = this.elementCreate('div', ['row'], false, container, false);
+            let column;
+            for (let i = 0; i < 9; i++) {
+                column = this.elementCreate('div', ['col-4', 'border', 'border-dark', 'fs-1', 'text-white'], 'Z', board, 'col' + i);
+                column.addEventListener('click', this.columnClicked);
+                this.states.push(0);
+            }
+            this.reset = this.elementCreate('button', ['my-3', 'd-none'], 'Reset', container, false);
+        } else {
+            this.moves = 0;
+            let column;
+            for (let i = 0; i < 9; i++) {
+                column = document.getElementById('col' + i);
+                column.addEventListener('click', this.columnClicked);
+                column.classList.add('text-white');
+                column.innerText = 'Z';
+                this.states[i] = 0;
+            }
+            if (!this.label.innerText.includes('Tie')) {
+                this.switchTurn();
+            }
+            this.label.innerText = 'Turn: ' + this.turn;
+            this.reset.classList.add('d-none');
+            this.reset.removeEventListener('click', this.start);
         }
-        this.reset = this.elementCreate('button', ['my-3', 'd-none'], 'Reset', container, false);
     }
 
     elementCreate(tag, classes, text, parent, id) {
@@ -110,25 +129,7 @@ class Game {
         }
         this.reset.classList.remove('d-none');
         this.count++;
-        this.reset.addEventListener('click', this.restart);
-    }
-
-    restart() {
-        this.moves = 0;
-        let column;
-        for (let i = 0; i < 9; i++) {
-            column = document.getElementById('col' + i);
-            column.addEventListener('click', this.columnClicked);
-            column.classList.add('text-white');
-            column.innerText = 'Z';
-            this.states[i] = 0;
-        }
-        if (!this.label.innerText.includes('Tie')) {
-            this.switchTurn();
-        }
-        this.label.innerText = 'Turn: ' + this.turn;
-        this.reset.classList.add('d-none');
-        this.reset.removeEventListener('click', this.restart);
+        this.reset.addEventListener('click', this.start);
     }
 }
 
