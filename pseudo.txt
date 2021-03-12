@@ -1,0 +1,86 @@
+1. What goes in the view?
+- container
+    row
+        header
+            'Tic-Tac-Toe'
+    row
+        header
+            'Turn: X' or
+            'Turn: O'
+    row
+        9 cols size 4
+    row
+        button
+            'Reset'
+    modal
+        'Winner is X!' or
+        'Winner is O!' or
+        'Tie!'
+
+2. What goes in the model?
+- turn
+    true (X turn) or
+    false (O turn)
+- board
+    [
+        0, 1, 2, 
+        3, 4, 5,
+        6, 7, 8 
+    ]
+    [ i ]
+        0 or
+        1 or
+        -1
+// since is a var that doesn't have state, goes in controller method
+// define as const
+// don't really need to declare to win conditions
+- winConditions
+    [
+        '012', '345', '678', '036', '147', '258', '048', '246'
+    ]
+- moves
+    0, 1, 2, ..., 9
+
+3. What goes in the controller?
+- initialize
+    - set up model
+        - create boolean for turn
+        - randomize turn
+        - create array for board
+        - fill board with 0s
+    - set up view
+        - create row for title
+        - create row for turn
+        - create grid for board
+        - create row for reset button
+    - render view
+        - display title
+        - display turn from model turn
+        - display board from model board
+
+- tile clicked
+    - update model
+        - fill clicked tile in model board based on turn & target's id
+        - increment moves
+    - update view
+        - fill clicked tile in view board based on turn & target's id
+    - if moves > 4
+        - if turn === true
+            - do any win conditions including clicked tile's index === 3
+                - declare x win
+                - enable reset button
+                - disable board clicking
+                - leave function
+        - else
+            // win conditions const will be included in check win function
+            - do any win conditions including clicked tile's index === -3
+                - declare o win
+                - enable reset button
+                - disable board clicking
+                - leave function
+    - if moves === 9
+        - declare tie
+            - enable reset button
+            - disable board clicking
+            - leave function
+    - alternate turn
